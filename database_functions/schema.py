@@ -40,8 +40,9 @@ class ProviderDate(Base):
 class DateAttribute(Base):
     __tablename__ = "date_attributes"
 
+    id = Column(Integer, primary_key=True)
 
-    provider_date_id = Column(Integer, ForeignKey("provider_dates.id"), nullable=False, primary_key=True)
+    provider_date_id = Column(Integer, ForeignKey("provider_dates.id"), nullable=False)
     name = Column(String)
     date = relationship("ProviderDate", back_populates="attributes")
 

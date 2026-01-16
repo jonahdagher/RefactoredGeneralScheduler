@@ -89,7 +89,6 @@ if ss.NEW_BATCH:
                     st.rerun()
         else:
             st.success("No Unprocessed Providers Detected")
-            st.write(schedule.getProviderSchedules())
             if st.button(label="Commit Changes to Database"):
                 for name in ss.NEW_BATCH["processed_new_providers"]:
                     p = Provider(name=name)
@@ -100,20 +99,36 @@ if ss.NEW_BATCH:
 
                 added_dates = []
                 provider_schedules = schedule.getProviderSchedules()
+                with open("attribute_filter.json", "r") as js: filter = json.load(js)
+
                 for name in provider_schedules:
 
                     provider_obj = session.execute(select(Provider).where(Provider.name == name)).scalar_one_or_none()
 
                     entries = provider_schedules[name].schedule
                     for entry in entries:
+
+                        detected_attributes = []
+                        color_attribute = filter.get(str(entry.color))
+                        value_attribute = filter.get(str(entry.value))
+
+                        if color_attribute: detected_attributes.append(color_attribute)
+                        if value_attribute: detected_attributes.append(value_attribute)
+                            
                         pd = ProviderDate(
                             provider=provider_obj,
                             date=entry.date,
                             color=entry.color,
                             value=entry.value
                         )
+                        
+                        pd.attributes = [
+                            DateAttribute(name=a)
+                            for a in detected_attributes
+                        ]
 
                         added_dates.append(pd)
+                        
                 session.add_all(added_dates)
                 
                 ss.pop("NEW_BATCH")

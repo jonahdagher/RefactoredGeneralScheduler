@@ -314,55 +314,6 @@ def previous_year_month(iso_year_month: str) -> str:
 
 
 
-
-class RankedList():
-    def __init__(self, session, time, master_list, day_list, 
-    names_excluded: list = list(), 
-    colors_excluded: list = list(),
-    values_excluded: list = list(),
-
-    names_specified: list = list(), 
-    colors_specified: list = list(),
-    values_specified: list = list(),
-    isRanked=True):
-        
-        self.session = session
-
-        self.time = time
-
-        self.master_list = list(master_list)
-        self.day_list = day_list
-
-        self.isRanked = isRanked
-
-        self.names_excluded = names_excluded 
-        self.colors_excluded = colors_excluded
-        self.values_excluded = values_excluded
-
-        self.names_specified = names_specified 
-        self.colors_specified = colors_specified
-        self.values_specified = values_specified
-
-    ISO_PATTERN = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$")
-    def generate_list(self, start=None, end=None):
-
-        if start is None: start = self.day_list[0]
-        if end is None: end = self.day_list[-1]
-
-        for day in self.day_list:
-            if day >= start and day <= end:
-                providers_working = get_providers(self.session, date=day, values_specified=[self.time], getNames=True)
-                providers_ranked_day = [provider for provider in self.master_list if provider in providers_working]
-
-                if not providers_ranked_day:
-                    continue
-
-                day_top_ranked_provider = providers_ranked_day[0]
-                self.master_list.remove(day_top_ranked_provider)
-                self.master_list.append(day_top_ranked_provider)
-
-                print(day, providers_ranked_day)
-
 class RankedColumn():
     def __init__(self, lists: list, spacing: int = 1):
         self.lists = lists
