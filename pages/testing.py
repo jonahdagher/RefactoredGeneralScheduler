@@ -34,5 +34,5 @@ with st.container(border=True):
     s = ScheduleFile("C:\\Users\\jonah\\Desktop\\Waterfall\\schedules\\" + p)
     detected_cell_values = s.getAllCellValues()
 
-    create_attribute_filter("attribute_filter.json", default_inputs=detected_cell_values, default_attributes= get_all_attribute_names(session))
+    create_attribute_filter("attribute_filter.json", default_inputs=detected_cell_values, default_outputs=get_all_attribute_names(session))
 

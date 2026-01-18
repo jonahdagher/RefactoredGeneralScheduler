@@ -25,7 +25,8 @@ def provider_attribute_editor(session, provider=None, attribute=None):
      
         else:
 
-            provider_current_attributes = session.execute(select(ProviderAttribute.attribute_name).join(Provider).where(Provider.name == provider.name)).scalars().all()   
+            provider_current_attributes = session.execute(select(ProviderAttribute.attribute_name).join(Provider).where(Provider.name == provider.name)).scalars().all()
+            st.write(provider_current_attributes) 
             edited_attributes = st.multiselect(label=f"Classes for {provider.name}", options=all_attribute_names, default=provider_current_attributes, key=f"attribute_multiselect_{st.session_state.REVERT_KEY}")
 
             if set(provider_current_attributes) != set(edited_attributes):
@@ -40,12 +41,14 @@ def create_provider_attribute(session):
     an = st.text_input("Attribute Name")
     if st.button("Create"):
         session.add(ProviderAttribute(
-            provider=p,
+            provider_id=p.id,
             attribute_name=an
         ))
 
+        session.commit()
+
 import json
-def create_attribute_filter(path, default_inputs=None, default_attributes=None):
+def create_attribute_filter(path, default_inputs=None, default_outputs=None):
 
     #Load Existing Links from File
     with open(path, "r") as js:
@@ -97,7 +100,7 @@ def create_attribute_filter(path, default_inputs=None, default_attributes=None):
 
                 with col2:
                     with st.container(border=True):
-                        filter_mode = st.radio(label="Filter Input", 
+                        filter_mode = st.radio(label="Filter Output", 
                                     horizontal=True, 
                                     options=["Detected", "Manual"],
                                     key="attr-mode" + filter + attribute)
@@ -110,7 +113,7 @@ def create_attribute_filter(path, default_inputs=None, default_attributes=None):
                         elif filter_mode == "Detected":
                             new_output = st.selectbox(label="filter",
                                         label_visibility="collapsed",
-                                        options=default_attributes,
+                                        options=default_outputs,
                                         key="attr-select_box" + filter + attribute)
                 with col3:
                     with st.container(border=True):
