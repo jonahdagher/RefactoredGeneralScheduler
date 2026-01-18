@@ -22,13 +22,13 @@ class CycleList(AttributeList):
         self.cycle_ammount = cycle_ammount
 
     def get_ranking(self, start_date=None, end_date=None, ammount_to_display=None):
-        master_list = get_providers(self.session, attributes_specified=self.attribute, attributes_excluded=self.excluded_attributes)
+        master_list = get_providers(self.session, provider_attributes_specified=self.attribute, provider_attributes_excluded=self.excluded_attributes)
         date_range = get_date_range(self.session, start_date, end_date)
 
         output_dict = dict()
 
         for date in date_range:
-            providers_on_date = get_providers(self.session, date, attributes_specified=[self.attribute])
+            providers_on_date = get_providers(self.session, provider_attributes_specified=[self.attribute])
             
             ranked_providers = [p for p in master_list if p in providers_on_date]
             top_ranked = ranked_providers[:self.cycle_ammount]
