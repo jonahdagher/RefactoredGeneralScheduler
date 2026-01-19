@@ -3,6 +3,7 @@ from sqlalchemy import *
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 from database_functions.provider_functions import *
+from database_functions.date_functions import *
 
 import os
 
@@ -34,5 +35,5 @@ with st.container(border=True):
     s = ScheduleFile("C:\\Users\\jonah\\Desktop\\Waterfall\\schedules\\" + p)
     detected_cell_values = s.getAllCellValues()
 
-    create_attribute_filter("attribute_filter.json", default_inputs=detected_cell_values, default_outputs=get_all_attribute_names(session))
+    create_attribute_filter("attribute_filter.json", default_inputs=detected_cell_values, default_outputs=get_date_attribute_filters("attribute_filter.json").values())
 

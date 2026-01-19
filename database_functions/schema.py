@@ -21,6 +21,13 @@ class ProviderAttribute(Base):
     attribute_name = Column(String, primary_key=True)
 
     provider = relationship("Provider", back_populates="attributes")
+
+class ProviderAttributeType(Base):
+    __tablename__ = "provider_attribute_types"
+
+    name = Column(String, primary_key=True)
+
+
 class ProviderDate(Base):
     __tablename__ = "provider_dates"
 
@@ -42,7 +49,7 @@ class DateAttribute(Base):
 
     id = Column(Integer, primary_key=True)
 
-    provider_date_id = Column(Integer, ForeignKey("provider_dates.id"), nullable=False)
+    provider_date_id = Column(Integer, ForeignKey("provider_dates.id", ondelete="CASCADE"), nullable=False)
     name = Column(String)
     date = relationship("ProviderDate", back_populates="attributes")
 

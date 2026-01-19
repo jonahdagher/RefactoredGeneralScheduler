@@ -2,6 +2,7 @@ import streamlit as st
 import os
 from file_classes.csv_classes import *
 from database_functions.provider_functions import *
+from database_functions.date_functions import get_date_range, delete_dates_in_range
 from database_functions.schema import *
 from streamlit_components.streamlit_database import *
 
@@ -42,6 +43,9 @@ if ss.NEW_BATCH:
     session = Session()
     Base.metadata.create_all(db_engine)
 
+    existing_days_for_inputted_month = get_date_range(session, f"{schedule.year_month}-01", f"{schedule.year_month}-31")
+    if existing_days_for_inputted_month:
+        st.warning(f"Detected existing dates for month [{schedule.year_month}]. Commiting changes will overide these dates")
 
 
     #Identify any newly detected providers and handle them.
@@ -56,10 +60,10 @@ if ss.NEW_BATCH:
         ss.NEW_BATCH["processed_new_providers"] = {}
  
     unprocessed_providers = ss.NEW_BATCH["new_providers"].difference(set(ss.NEW_BATCH["processed_new_providers"].keys()))    
-    with st.expander("View State"):
-        st.write(providers_existing_in_database)
-        st.write(ss.NEW_BATCH)
-        st.write(unprocessed_providers)
+    # with st.expander("View State"):
+    #     st.write(providers_existing_in_database)
+    #     st.write(ss.NEW_BATCH)
+    #     st.write(unprocessed_providers)
 
     with st.container(border=True):
 
@@ -69,7 +73,7 @@ if ss.NEW_BATCH:
         
             #Multiselect box to apply attributes to new providers
             if selected_provider:
-                selected_provider_attributes = st.multiselect("Select Attributes to Apply", options=get_all_attribute_names(session))
+                selected_provider_attributes = st.multiselect("Select Attributes to Apply", options=get_all_provider_attribute_names(session), format_func=lambda an: an.name)
             
             #Confirm and Delete Buttons
             col1, col2 = st.columns(2)
@@ -90,9 +94,12 @@ if ss.NEW_BATCH:
         else:
             st.success("No Unprocessed Providers Detected")
             if st.button(label="Commit Changes to Database"):
+                if existing_days_for_inputted_month:
+                    delete_dates_in_range(session, existing_days_for_inputted_month[0], existing_days_for_inputted_month[-1])
+                    
                 for name in ss.NEW_BATCH["processed_new_providers"]:
                     p = Provider(name=name)
-                    p.attributes = [ProviderAttribute(attribute_name=pn) for pn in ss.NEW_BATCH["processed_new_providers"][name]]
+                    p.attributes = [ProviderAttribute(attribute_name=pn.name) for pn in ss.NEW_BATCH["processed_new_providers"][name]]
 
                     session.add(p)
                 session.flush()
