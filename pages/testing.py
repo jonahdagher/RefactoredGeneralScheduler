@@ -14,7 +14,8 @@ engine = create_engine("sqlite:///database.db")
 SessionLocal = sessionmaker(
     bind=engine,
     autoflush=False,
-    autocommit=False
+    autocommit=False,
+    expire_on_commit=False
 )
 
 session = SessionLocal()

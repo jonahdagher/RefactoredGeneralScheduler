@@ -107,6 +107,7 @@ if ss.NEW_BATCH:
                 added_dates = []
                 provider_schedules = schedule.getProviderSchedules()
                 with open("attribute_filter.json", "r") as js: filter = json.load(js)
+                with open("settings.json", "r") as s: settings = json.load(s)
 
                 for name in provider_schedules:
 
@@ -116,11 +117,14 @@ if ss.NEW_BATCH:
                     for entry in entries:
 
                         detected_attributes = []
-                        color_attribute = filter.get(str(entry.color))
-                        value_attribute = filter.get(str(entry.value))
+                        if str(entry.value) not in filter or entry.value == None:
+                            detected_attributes.append(settings["attributes"]["default_empty_attribute"])
+                        else:
+                            color_attribute = filter.get(str(entry.color))
+                            value_attribute = filter.get(str(entry.value))
 
-                        if color_attribute: detected_attributes.append(color_attribute)
-                        if value_attribute: detected_attributes.append(value_attribute)
+                            if color_attribute: detected_attributes.append(color_attribute)
+                            if value_attribute: detected_attributes.append(value_attribute)
                             
                         pd = ProviderDate(
                             provider=provider_obj,
@@ -139,8 +143,8 @@ if ss.NEW_BATCH:
                 session.add_all(added_dates)
                 
                 ss.pop("NEW_BATCH")
-                try:
-                    session.commit()
-                except:
-                    session.rollback()
+                # try:
+                session.commit()
+                # except:
+                # session.rollback()
                 st.rerun()

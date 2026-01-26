@@ -1,0 +1,19 @@
+{
+  "paths": {
+    "files": {
+      "database": "sqlite:///C:/Users/jonah/Desktop/RefactoredWaterfall/database.db"
+    },
+    "folders": {
+      "schedule_folder": "C:\\Users\\jonah\\Desktop\\RefactoredWaterfall\\"
+    }
+  },
+
+  "attributes":{
+    "default_empty_attribute" : "OFF",
+    "default_unknown_attribute" : "OFF",
+    "defauly_color" : ""
+  }
+
+  
+
+}

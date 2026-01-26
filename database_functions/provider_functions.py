@@ -4,14 +4,17 @@ from file_classes.csv_classes import *
 from sqlalchemy import select, func, and_, exists, not_
 
 def get_providers(session, provider_attributes_specified=None, provider_attributes_excluded=None, 
-                  date=None, date_attributes_specified=None, date_attributes_excluded=None):
+                  date=None, date_attributes_specified=None, date_attributes_excluded=None, default_ignore="OFF"):
     
     
     query = select(Provider).distinct()
     
     if date:
         
-        query = query.join(Provider.dates).where(ProviderDate.date == date)
+        query = query.join(Provider.dates)\
+             .where(ProviderDate.date == date)\
+             .where(ProviderDate.attributes.any(DateAttribute.name != default_ignore))
+
         
         
         if date_attributes_specified:

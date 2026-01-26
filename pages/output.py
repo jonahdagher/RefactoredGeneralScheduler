@@ -1,26 +1,29 @@
 import streamlit as st
-import pandas as pd
-from database_functions.output_classes import OutputColumn, OutputChunk, OutputSheet
-
+import os
+from database_functions.provider_functions import *
+from database_functions.date_functions import *
+from database_functions.schema import *
+from database_functions.output_classes import *
+from streamlit_components.streamlit_database import *
+from streamlit_calendar import calendar
 ss = st.session_state
 
-if "OUTPUT_PAGE" not in ss: ss["OUTPUT_PAGE"] = "SHEET"
-OUTPUT_PAGE = ss["OUTPUT_PAGE"]
-
-OUTPUT_PAGE_OPTIONS = ["LIST", "SHEET", "CHUNK"]
-
-OUTPUT_PAGE = st.selectbox("PAGE", OUTPUT_PAGE_OPTIONS)
-
-if OUTPUT_PAGE == "LIST":
-    with st.container(border=True):
-        LIST_MODE = st.radio(label="List By:",
-                        options=["Provider Attribute", "Date Attribute"],
-                        horizontal=True)
-        date_attributes_excluded = None
-
-elif OUTPUT_PAGE == "SHEET":
-    pass
-
-elif OUTPUT_PAGE == "CHUNK":
-    pass
-
+db_engine = create_engine("sqlite:///database.db", connect_args={"check_same_thread": False})
+Session = sessionmaker(
+    bind=db_engine,
+    autoflush=False,
+    autocommit=False
+)
+session = Session()
+# d = get_date_range(session, start_date="2026-02", end_date="2026-02-32")
+for d in get_date_range(session, start_date="2026-02", end_date="2026-02-32"):
+    providers_on_day = get_providers_on_date(session, d)
+    for provider in providers_on_day:
+        attributes_on_day = session.execute(
+                                    select(DateAttribute)
+                                    .join(ProviderDate, DateAttribute.provider_date_id == ProviderDate.id)
+                                    .where(ProviderDate.date == d)
+                                    .where(ProviderDate.provider_id == provider.id)   # or Provider.name filter via join
+                                ).scalars().all()
+        # st.write(provider.name, [a.name for a in attributes_on_day])
+# calendar()

@@ -21,11 +21,13 @@ class ProviderAttribute(Base):
     attribute_name = Column(String, primary_key=True)
 
     provider = relationship("Provider", back_populates="attributes")
+    color = Column(String)
 
 class ProviderAttributeType(Base):
     __tablename__ = "provider_attribute_types"
 
     name = Column(String, primary_key=True)
+    color = Column(String)
 
 
 class ProviderDate(Base):

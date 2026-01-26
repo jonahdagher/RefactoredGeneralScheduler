@@ -1,7 +1,7 @@
 from sqlalchemy import select, and_, exists, not_
 from file_classes.csv_classes import *
 
-from sqlalchemy import select, func, and_, exists, not_
+from sqlalchemy import *
 import json
 
 
@@ -43,3 +43,28 @@ def delete_dates_in_range(session, start_date=None, end_date=None):
     session.commit()
     return res.rowcount
 
+def get_provider_dates(session, provider, date_attributes_included = None, date_attributes_excluded=None):
+    query = select(ProviderDate).join(Provider).where(Provider.name == provider)
+
+    if date_attributes_included:
+        query = query.join(ProviderDate.attributes).where(DateAttribute.name.in_(date_attributes_included))
+    if date_attributes_excluded:
+        query = query.where(~ProviderDate.attributes.any(DateAttribute.name.in_(date_attributes_excluded)))
+
+
+    return session.execute(query).scalars().all()
+def get_providers_on_date(session, date, date_attr_included=None, date_attr_excluded=None):
+    q = (
+        select(Provider)
+        .join(ProviderDate, ProviderDate.provider_id == Provider.id)
+        .where(ProviderDate.date == date)
+    )
+    q = q.where(~ProviderDate.attributes.any(DateAttribute.name == "OFF"))
+    if date_attr_included:
+        for attr in date_attr_included:
+            q = q.where(ProviderDate.attributes.any(DateAttribute.name == attr))
+    if date_attr_excluded:
+        for attr in date_attr_excluded:
+            q = q.where(~ProviderDate.attributes.any(DateAttribute.name == attr))
+
+    return session.execute(q).scalars().all()
