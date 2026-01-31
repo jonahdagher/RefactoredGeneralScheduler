@@ -69,6 +69,19 @@ def create_provider_attribute(session):
         session.commit()
         st.success(f"Attribute [{an}] Commited!")
 
+def create_date_attribute(session):
+    an = st.text_input("Attribute Name")
+    color = st.color_picker("Attribute Color")
+    if st.button("Create"):
+        session.add(DateAttributeType(
+            name=an,
+            color=color
+        ))
+
+        session.commit()
+        st.success(f"Attribute [{an}] Commited!")
+
+
 import json
 def create_attribute_filter(path, default_inputs=None, default_outputs=None):
 
@@ -81,7 +94,7 @@ def create_attribute_filter(path, default_inputs=None, default_outputs=None):
     #Display the existing links
     with st.expander("Existing Links"):
         for input, output in list(attribute_filters.items()):
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3, col4, col5 = st.columns(5)
             with col1:
                 
                 if input[0] == "#":
@@ -92,7 +105,7 @@ def create_attribute_filter(path, default_inputs=None, default_outputs=None):
                 st.subheader(":")
             with col3:
                 st.subheader(output)
-            with col4:
+            with col5:
                 if st.button("delete", key=input):
                     with open(path, "w") as js:
                         del attribute_filters[input]

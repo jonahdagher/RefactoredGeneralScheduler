@@ -11,7 +11,7 @@
   "attributes":{
     "default_empty_attribute" : "OFF",
     "default_unknown_attribute" : "OFF",
-    "defauly_color" : ""
+    "default_color" : "#2ec4b6"
   }
 
   

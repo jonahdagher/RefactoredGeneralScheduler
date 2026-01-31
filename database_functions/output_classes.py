@@ -1,6 +1,9 @@
-from file_classes.csv_classes import *
-from database_functions.provider_functions import get_providers
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from database_functions.provider_functions import get_providers, get_provider_by_name
 from database_functions.date_functions import get_date_range, get_provider_dates
+
+from database_functions.schema import ProviderDate, DateAttribute
 
 def previous_year_month(iso_year_month: str) -> str:
     dt = datetime.strptime(iso_year_month, "%Y-%m")
@@ -18,32 +21,54 @@ class RankedOutput():
         return
     
 class RankedPercentOutput(RankedOutput):
-    def getRankingForDate(self, date):
+    def getRankingForDate(self, date, rank_start=None, rank_end=None):
         
-        # self.session.execute(delete(DateAttribute).join(ProviderDate).where(ProviderDate.date == date))
-
+        #Get providers on date
         providers = get_providers(session=self.session,
-                             date=date,
-                      provider_attributes_specified=self.provider_attr_included,
-                      date_attributes_excluded=self.date_attr_exlcuded)
+            date=date,
+            provider_attributes_specified=self.provider_attr_included,
+            date_attributes_excluded=self.date_attr_exlcuded)
         
-        output_dict = dict()
-        for p in providers:
-            days_extra = get_provider_dates(self.session, p.name, [self.ranking_attr])
-            days_working = get_provider_dates(self.session, p.name, date_attributes_excluded=["OFF"])
-            output_dict[p.name] = 0 if len(days_working) == 0 else 100 * round(len(days_extra)/len(days_working), 2)
-            sorted_list = sorted(output_dict, key=lambda x: output_dict[x], reverse=True)
+        attr_percent_dict = dict()
+        for provider in providers:
+            total_date_amt = len(get_provider_dates(self.session,provider,
+                                                    start=rank_start,
+                                                    end=rank_end))
+            attr_date_amt = len(get_provider_dates(self.session,
+                                                   provider,
+                                                   start=rank_start,
+                                                   end=rank_end,
+                                                   date_attributes_included=[self.ranking_attr]))
+            # if attr_date_amt != 0:
+            attr_percent_dict[provider.name] = attr_date_amt/total_date_amt if total_date_amt != 0 else 0
+        ranked_list = sorted(list(attr_percent_dict.keys()), key=lambda n: attr_percent_dict[n])
 
-            for name in sorted_list[:self.attribution_ammount]:
-                provider_date = self.session.execute(
-                                select(ProviderDate).where(ProviderDate.date==date).join(Provider).where(Provider.name==name)
-                            ).scalar_one_or_none()
-                provider_date.attributes.append(DateAttribute(
-                    name = self.ranking_attr
-                ))
-            self.session.commit()
+        attributed_names = ranked_list[:self.attribution_ammount]
+        for name in attributed_names:
 
-        return sorted_list
+            provider = get_provider_by_name(self.session, name)
+
+            provider_date = (
+            self.session.query(ProviderDate)
+            .filter(
+                ProviderDate.provider_id == provider.id,
+                ProviderDate.date == date
+            )
+            .one_or_none()
+            )
+            if provider_date:
+                provider_date.attributes.append(DateAttribute(name=self.ranking_attr))
+                print(provider_date.attributes)
+            else:
+                print("error",provider, date)
+        self.session.commit()
+
+        return
+        
+        
+        
+        
+        
         
         
         

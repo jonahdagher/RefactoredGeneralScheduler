@@ -14,6 +14,9 @@ class Provider(Base):
 
     dates = relationship("ProviderDate", back_populates="provider")
 
+    def __repr__(self):
+        return f"<Name: {self.name}, Attr: {self.attributes}>"
+
 class ProviderAttribute(Base):
     __tablename__ = "provider_attributes"
 
@@ -22,6 +25,9 @@ class ProviderAttribute(Base):
 
     provider = relationship("Provider", back_populates="attributes")
     color = Column(String)
+
+    def __repr__(self):
+        return f"<Name: {self.attribute_name}>"
 
 class ProviderAttributeType(Base):
     __tablename__ = "provider_attribute_types"
@@ -46,6 +52,9 @@ class ProviderDate(Base):
 
     __table_args__ = (UniqueConstraint("provider_id", "date", name="uq_provider_date"),)
 
+    def __repr__(self):
+        return f"<Date: {self.date}, Attr: {self.attributes}>" 
+
 class DateAttribute(Base):
     __tablename__ = "date_attributes"
 
@@ -54,6 +63,15 @@ class DateAttribute(Base):
     provider_date_id = Column(Integer, ForeignKey("provider_dates.id", ondelete="CASCADE"), nullable=False)
     name = Column(String)
     date = relationship("ProviderDate", back_populates="attributes")
+
+    def __repr__(self):
+        return f"<Name: {self.name}>"
+    
+class DateAttributeType(Base):
+    __tablename__= "date_attribute_types"
+
+    name = Column(String, primary_key=True)
+    color = Column(String)
 
 class PreviousRankings(Base):
     __tablename__ = "previous_rankings"

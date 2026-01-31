@@ -3,6 +3,13 @@ from file_classes.csv_classes import *
 
 from sqlalchemy import select, func, and_, exists, not_
 
+def get_provider_by_name(session, provider):
+    if isinstance(provider, str):
+        provider = session.execute(select(Provider).where(Provider.name == provider)).scalar_one_or_none()
+    elif not isinstance(provider, Provider):
+        raise TypeError(f"provider must be (str, Provider) not {type(provider)}")
+    return provider
+
 def get_providers(session, provider_attributes_specified=None, provider_attributes_excluded=None, 
                   date=None, date_attributes_specified=None, date_attributes_excluded=None, default_ignore="OFF"):
     
